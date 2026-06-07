@@ -1,6 +1,7 @@
 import streamlit as st
 import base64
 from src.predict import run_inference
+from pathlib import Path
 
 # Helper function to load local GIFs for HTML rendering
 @st.cache_data
@@ -9,7 +10,7 @@ def get_base64_gif(file_path):
         with open(file_path, "rb") as f:
             data = f.read()
         return base64.b64encode(data).decode()
-    except FileNotFoundError:
+    except Exception:
         return ""
 
 st.set_page_config(page_title="Spotify Vibe Matrix", layout="wide")
@@ -218,25 +219,30 @@ with col2:
             gif_path = "b4.gif"
         
         # Convert the designated GIF to Base64
-        gif_base64 = get_base64_gif(gif_path)
-        
-        # Added height: 280px and object-fit: cover to ensure all GIFs render exactly the same size without stretching
-        gif_html = f'<img src="data:image/gif;base64,{gif_base64}" style="width: 100%; height: 390px; object-fit: cover; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">' if gif_base64 else ''
+        BASE_DIR = Path(__file__).parent
 
-        # Change your result display block to this exact format:
-        html_string = f"""
+        gif_full_path = BASE_DIR / gif_path
+
+        gif_base64 = get_base64_gif(str(gif_full_path))
+
+        gif_html = (
+            f'<img src="data:image/gif;base64,{gif_base64}" '
+            f'style="width: 100%; height: 390px; object-fit: cover; '
+            f'border-radius: 8px; margin-bottom: 20px; '
+            f'box-shadow: 0 4px 15px rgba(0,0,0,0.5);">'
+            if gif_base64 else ''
+        )
+        st.markdown(f"""
         <div style="background: linear-gradient(180deg, {color} 0%, #121212 100%); padding: 2px; border-radius: 10px;">
             <div class='result-card'>
                 <div class='playlist-header'>TFI Archetype • AI Generated</div>
                 {gif_html}
                 <div class='playlist-title'>{playlist}</div>
-            <div class='playlist-desc'>{desc}</div>
-        <div style='color: #FFFFFF; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;'>Spotify PCA Coordinates</div>
-    </div>
-</div>
-"""
-        # Use this exact line - NO indentation before the variable
-        st.markdown(html_string, unsafe_allow_html=True)
+                <div class='playlist-desc'>{desc}</div>
+                <div style='color: #FFFFFF; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;'>Spotify PCA Coordinates</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         m1, m2 = st.columns(2)
