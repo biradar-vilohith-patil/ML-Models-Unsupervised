@@ -3,7 +3,7 @@ from src.predict import run_inference
 
 st.set_page_config(page_title="AlgoCheck", page_icon="📱", layout="centered")
 
-with open('style.css') as f:
+with open('dbScan/style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 st.markdown("""
